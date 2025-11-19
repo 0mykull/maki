@@ -1,74 +1,80 @@
-use std::{env, fs, path::Path};
-use std::process;
+use std::{
+    env,
+    fs::{self, File},
+    path::PathBuf,
+    process::exit,
+};
 
-/// The main entry point for the maki CLI tool.
-/// It reads the first command-line argument and determines whether to create a
-/// file or a directory based on the presence of a trailing slash '/'.
+const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+const NAME: &'static str = env!("CARGO_PKG_NAME");
+
 fn main() {
-    // 1. Collect command-line arguments.
-    let args: Vec<String> = env::args().collect();
-
-    // 2. Check for the correct number of arguments. We expect the program name + one target path.
-    if args.len() != 2 {
-        eprintln!("
-  \x1b[1;36m<maki>\x1b[0m - Minimal File/Directory Creator
-
-  \x1b[1;33mUSAGE:\x1b[0m maki <path>
-
-  \x1b[1;32mEXAMPLES:\x1b[0m
-  \u{25b6} \x1b[36mmaki components/Button.rs\x1b[0m  (Creates a file)
-  \u{25b6} \x1b[36mmaki lib/data/\x1b[0m               (Creates a directory, including parents)
-");
-        process::exit(1);
-    }
-
-    // The target path is the second element in the arguments vector.
-    let target_input = &args[1];
-
-    // Determine if the input path is requesting a directory.
-    let is_dir_request = target_input.ends_with('/');
-
-    // Prepare the actual path string for file system operations.
-    let target_path_str: String;
-
-    if is_dir_request {
-        // For directories, trim the trailing slash, as the `create_dir_all` function
-        // expects the path to be the directory name itself.
-        target_path_str = target_input.trim_end_matches('/').to_string();
+    let args: Vec<String> = std::env::args().collect();
+    if args.len() > 1 {
+        check_builtins(&args);
+        create(&args).unwrap_or_else(|err| {
+            println!("Error: {}", err);
+        });
     } else {
-        // For files, use the path exactly as provided.
-        target_path_str = target_input.clone();
+        println!("No command provided");
+        help();
     }
+}
 
-    // Basic validation to prevent creating items with empty names.
-    if target_path_str.is_empty() {
-        eprintln!("\x1b[1;31mError:\x1b[0m The resulting file or directory name is empty.");
-        process::exit(1);
-    }
-
-    let target_path = Path::new(&target_path_str);
-
-    if is_dir_request {
-        // --- Directory Creation ---
-        println!("\x1b[1;34mDIR:\x1b[0m Creating directory structure: '{}'", target_path_str);
-        // Use create_dir_all to create the directory and any necessary parent directories.
-        match fs::create_dir_all(target_path) {
-            Ok(_) => println!("\x1b[1;32mSUCCESS:\x1b[0m Directory '{}' created.", target_path_str),
-            Err(e) => {
-                eprintln!("\x1b[1;31mERROR:\x1b[0m Failed to create directory '{}': {}", target_path_str, e);
-                process::exit(1);
-            }
+fn check_builtins(args: &[String]) {
+    let inbuilts = vec!["--help", "--version", "-h", "-v"];
+    if inbuilts.contains(&args[1].as_str()) {
+        match args[1].as_str() {
+            "--help" | "-h" => help(),
+            "--version" | "-v" => version(),
+            _ => println!("Invalid command"),
         }
-    } else {
-        // --- File Creation ---
-        println!("\x1b[1;34mFILE:\x1b[0m Creating file: '{}'", target_path_str);
-        // fs::File::create will create the file and truncate it if it already exists.
-        match fs::File::create(target_path) {
-            Ok(_) => println!("\x1b[1;32mSUCCESS:\x1b[0m File '{}' created.", target_path_str),
-            Err(e) => {
-                eprintln!("\x1b[1;31mERROR:\x1b[0m Failed to create file '{}': {}", target_path_str, e);
-                process::exit(1);
+        exit(0);
+    }
+}
+
+fn help() {
+    println!(
+        "
+Description:
+  A blazingly fast alternative to the classic 'touch' command with a sprinkle of mkdir
+Options: 
+-h, --help: Show this help message
+-v, --version: Show version
+Example:
+  bonk foo.txt bar.txt - Creates foo.txt and bar.txt
+  bonk foo/bar.txt - Creates bar.txt in foo directory
+  bonk foo/foobar.txt bar.txt baz/ - Creates foobar.txt in foo directory, 
+  bar.txt in current directory and baz directory
+"
+    );
+}
+
+fn version() {
+    println!("{} {}", NAME, VERSION);
+}
+
+fn create(args: &[String]) -> Result<(), Box<dyn std::error::Error>> {
+    let fargs = args.iter().map(PathBuf::from).skip(1).collect::<Vec<_>>();
+    for arg in &fargs {
+        if check_if_dir(arg.to_str().ok_or("Error")?) {
+            if arg.to_str().ok_or("Error")?.ends_with('/')
+                || arg.to_str().ok_or("Error")?.ends_with('\\')
+            {
+                fs::create_dir_all(arg)?;
+            } else {
+                fs::create_dir_all(arg.parent().ok_or("Error")?)?;
+                if !arg.exists() {
+                    File::create(arg)?;
+                }
             }
+        } else if !arg.exists() {
+            File::create(arg)?;
         }
     }
+    Ok(())
+}
+
+fn check_if_dir(dir: &str) -> bool {
+    dir.contains('\\') || dir.contains('/')
 }

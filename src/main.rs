@@ -1,32 +1,43 @@
-use std::{
-    env,
-    // fs::{self, File},
-    // path::PathBuf,
-    // process::exit,
-};
+mod messages;
 
-const VERSION: &str = env!("CARGO_PKG_VERSION");
-const NAME: &str = env!("CARGO_PKG_NAME");
+use messages::*;
+
+use std::{fs, io, path::Path, process};
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    if args.len() > 1 {
-        println!("{NAME}: Feature coming soon");
-    } else {
-        help();
-        version();
+
+    if args.len() == 1 {
+        usage_message();
+        process::exit(0);
+    }
+    if args.iter().any(|flag| flag == "--help") {
+        help_message();
+        process::exit(0);
+    }
+    if args.iter().any(|flag| flag == "--version") {
+        version_message();
+        process::exit(0);
+    }
+    if args.len() == 2
+        && let Err(e) = create(&args[1])
+    {
+        eprintln!("Error creating: {e}");
     }
 }
 
-fn check_flag() {
-    todo!();
-}
+fn create(user_path: &str) -> io::Result<()> {
+    // path is string, ends with '/' create dir, else create file
+    // constraints: dir alr exists,
+    let path = Path::new(user_path);
 
-fn version() {
-    println!("{NAME}: {VERSION}")
-}
-
-fn help() {
-    println!("{NAME}: A modern replacement for touch and mkdir commands.");
-    println!("Options:\n -V, --version: Show version")
+    if user_path.ends_with('/') {
+        fs::create_dir_all(path)?;
+        println!("Directory {} created successfully.", path.display());
+    } else {
+        let parent_dirs = path.parent().unwrap();
+        fs::create_dir_all(parent_dirs)?;
+        fs::File::create(path)?;
+    }
+    Ok(())
 }

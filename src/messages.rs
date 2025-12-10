@@ -1,17 +1,17 @@
-// const YELLOW: &str = "\x1b[1;33m";
+const YELLOW: &str = "\x1b[1;33m";
 // const RED: &str = "\x1b[1;31m";
 // const GREEN: &str = "\x1b[1;32m";
-// const RESET: &str = "\x1b[0m";
+const RESET: &str = "\x1b[0m";
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const NAME: &str = env!("CARGO_PKG_NAME");
 
 pub fn version_message() {
-    println!("{NAME}: {VERSION}")
+    println!("{YELLOW}{NAME}: {VERSION}{RESET}")
 }
 
 pub fn usage_message() {
-    println!("Usage: {NAME} newdir/newfile [options]...")
+    println!("{YELLOW}Usage: {NAME} newdir/newfile [options]...{RESET}")
 }
 
 pub fn help_message() {
@@ -29,5 +29,5 @@ Example:
     bar.txt in current directory and baz directory   
 "
     );
-    println!("{}", help_message);
+    println!("{YELLOW}{}{RESET}", help_message);
 }

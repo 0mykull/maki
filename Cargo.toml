@@ -1,11 +1,11 @@
 [package]
 name = "maki"
-version = "1.0.0"
+version = "0.1.0"
 edition = "2024"
 authors = ["0mykull <michaelsousajr@gmail.com>"]
 description = "A better touch and mkdir rolled up."
 license = "MIT"
-repository = "https://github.com/00mykull/maki"
+repository = "https://github.com/0mykull/maki"
 readme = "README.md"
 keywords = ["mkdir", "touch", "directory", "automation", "cli"]
 categories = ["command-line-utilities"]

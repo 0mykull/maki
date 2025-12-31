@@ -1,10 +1,10 @@
-// const YELLOW: &str = "\x1b[1;33m";
-// // const RED: &str = "\x1b[1;31m";
-// // const GREEN: &str = "\x1b[1;32m";
-// const RESET: &str = "\x1b[0m";
-//
-// const VERSION: &str = env!("CARGO_PKG_VERSION");
-// const NAME: &str = env!("CARGO_PKG_NAME");
+const YELLOW: &str = "\x1b[1;33m";
+// const RED: &str = "\x1b[1;31m";
+// const GREEN: &str = "\x1b[1;32m";
+const RESET: &str = "\x1b[0m";
+
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+const NAME: &str = env!("CARGO_PKG_NAME");
 //
 // pub fn version_message() {
 //     println!("{YELLOW}{NAME}: {VERSION}{RESET}")

@@ -3,11 +3,12 @@ use std::process;
 
 pub struct Settings {
     pub verbose: bool,
+    // Features
     pub git: bool,
     pub npm: bool,
     pub cargo: bool,
     pub go: bool,
-    // executable removed
+    // Configuration
     pub mode: Option<u32>,
     pub paths: Vec<String>,
 }
@@ -20,11 +21,11 @@ impl Settings {
             npm: false,
             cargo: false,
             go: false,
-            // executable removed
             mode: None,
             paths: Vec::new(),
         };
 
+        // Skip program name
         let args: Vec<String> = std::env::args().skip(1).collect();
         let mut iter = args.into_iter();
 
@@ -41,13 +42,13 @@ impl Settings {
                 }
                 "-v" | "--verbose" => settings.verbose = true,
 
-                // --- Init Flags ---
+                // --- Feature Flags ---
                 "-g" | "--git" => settings.git = true,
                 "-n" | "--npm" => settings.npm = true,
                 "-c" | "--cargo" => settings.cargo = true,
                 "--go" | "--golang" => settings.go = true,
 
-                // --- Value Flags ---
+                // --- Config Flags ---
                 "-m" | "--mode" => {
                     if let Some(val) = iter.next() {
                         match u32::from_str_radix(&val, 8) {

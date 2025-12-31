@@ -11,11 +11,6 @@ keywords = ["mkdir", "touch", "directory", "automation", "cli"]
 categories = ["command-line-utilities"]
 exclude = ["tests"]
 
-[dependencies]
-
-# [dev-dependencies]
-# tempfile = "3.8.1"
-
 [[bin]]
 name = "maki"
 path = "src/main.rs"

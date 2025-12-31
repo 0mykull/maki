@@ -1,9 +1,8 @@
-mod args;
-mod init;
 mod messages;
+mod settings;
 mod utils;
 
-use args::Settings;
+use settings::Settings;
 
 fn main() {
     let settings = Settings::parse();
